@@ -127,7 +127,7 @@ app.get("/movies/:genderName", async (req, res) => {
             where: {
                 genres: {
                     name: {
-                        equals: genderName,
+                        equals: req.params.genderName,
                         mode: "insensitive",
                     },
                 },

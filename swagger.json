@@ -97,6 +97,43 @@
                     }
                 }
             }
+        },
+        "/movies/{genreName}": {
+            "get": {
+                "tags": [
+                    "Movie"
+                ],
+                "summary": "List all movies by genre",
+                "parameters": [
+                    {
+                        "name": "genreName",
+                        "in": "path",
+                        "description": "Genre name",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Return a list of movies by genre",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Movie"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failure listing movies by genre"
+                    }
+                }
+            }
         }
     },
     "components": {

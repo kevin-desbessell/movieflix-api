@@ -29,6 +29,74 @@
                     }
                 }
             }
+        },
+        "/movies/{id}": {
+            "put": {
+                "tags": [
+                    "Movie"
+                ],
+                "summary": "Update a movie",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Movie id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MovieInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Movie updated successfully"
+                    },
+                    "404": {
+                        "description": "Movie not found"
+                    },
+                    "500": {
+                        "description": "Failure updating movie"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Movie"
+                ],
+                "summary": "Delete a movie",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Movie id to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Movie deleted successfully"
+                    },
+                    "404": {
+                        "description": "Movie not found"
+                    },
+                    "500": {
+                        "description": "Failure deleting movie"
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -77,6 +145,39 @@
                                 "description": "Language name"
                             }
                         }
+                    },
+                    "oscar_count": {
+                        "type": "integer",
+                        "description": "Number of oscars won by the movie"
+                    },
+                    "release_date": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Movie release date"
+                    }
+                }
+            },
+            "MovieInput": {
+                "type": "object",
+                "required": [
+                    "title",
+                    "genre_id",
+                    "language_id",
+                    "oscar_count",
+                    "release_date"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Movie title"
+                    },
+                    "genre_id": {
+                        "type": "integer",
+                        "description": "Movie genre"
+                    },
+                    "language_id": {
+                        "type": "integer",
+                        "description": "Movie language"
                     },
                     "oscar_count": {
                         "type": "integer",

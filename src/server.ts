@@ -11,16 +11,36 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/movies", async (_, res) => {
-    const movies = await prisma.movie.findMany({
-        orderBy: {
-            title: "asc"
-        },
-        include: {
-            genres: true,
-            languages: true
+    try {
+        const movies = await prisma.movie.findMany({
+            orderBy: {
+                title: "asc",
+            },
+            include: {
+                genres: true,
+                languages: true,
+            },
+        });
+
+        // Cálculo da quantidade total de filmes
+        const totalMovies = movies.length;
+
+        // Cálculo da média de duração dos filmes
+        let totalDuration = 0;
+        for (const movie of movies) {
+            totalDuration += movie.duration ?? 0;  // Use o operador nullish coalescing para tratar 'null' como 0
         }
-    });
-    res.json(movies);
+        const averageDuration = totalMovies > 0 ? totalDuration / totalMovies : 0;
+
+        res.json({
+            totalMovies,
+            averageDuration,
+            movies,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Houve um problema ao buscar os filmes." });
+    }
 });
 
 app.post("/movies", async (req, res) => {

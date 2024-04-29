@@ -138,8 +138,55 @@ app.get("/movies/:genderName", async (req, res) => {
     } catch (error) {
         return res.status(500).send({ message: "Falha ao atualizar um filme" });
     }
-
 });
+
+app.put("/genres/:id", async (req, res) => {
+    // Extrai o ID do parâmetro da URL e o nome do gênero do corpo da requisição
+    const id = Number(req.params.id);
+    const { name } = req.body;
+
+    // Verifica se o nome do gênero foi enviado no corpo da requisição, se não foi, retorna um erro 400
+    if (!name) {
+        return res.status(400).send({ message: "Nome do gênero é obrigatório" });
+    }
+
+    // Tenta encontrar um gênero com o ID informado, se não encontrar, retorna um erro 404
+    try {
+        const genre = await prisma.genre.findUnique({
+            where: { id }
+        });
+
+        if (!genre) {
+            return res.status(404).send({ message: "Gênero não encontrado!" });
+        }
+
+        //Verifica se já existe um gênero com o nome informado, se existir, retorna um erro 409
+        const existingGenre = await prisma.genre.findFirst({
+            where: {
+                name: {
+                    equals: name,
+                    mode: "insensitive"
+                }
+            }
+        });
+
+        if (existingGenre) {
+            return res.status(409).send({ message: "Já existe um gênero cadastrado com esse nome" });
+        }
+
+        // Atualiza o gênero no banco de dados se não houver erros
+        const updatedGenre = await prisma.genre.update({
+            where: { id },
+            data: { name }
+        });
+
+        res.status(200).send(updatedGenre);
+
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao atualizar um gênero" });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Servidor em execução em http://localhost:${port}`);

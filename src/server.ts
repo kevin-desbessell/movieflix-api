@@ -187,6 +187,40 @@ app.put("/genres/:id", async (req, res) => {
     }
 });
 
+app.post("/genres", async (req, res) => {
+    // Extrai o nome do gênero do corpo da requisição
+    const { name } = req.body;
+
+    // Verifica se o nome do gênero foi enviado no corpo da requisição, se não foi, retorna um erro 400
+    if (!name) {
+        return res.status(400).send({ message: "Nome do gênero é obrigatório" });
+    }
+
+    // Verifica se já existe um gênero com o nome informado, se existir, retorna um erro 409
+    try {
+        const existingGenre = await prisma.genre.findFirst({
+            where: {
+                name: {
+                    equals: name,
+                    mode: "insensitive"
+                }
+            }
+        });
+
+        if (existingGenre) {
+            return res.status(409).send({ message: "Já existe um gênero cadastrado com esse nome" });
+        }
+
+        // Cria um novo gênero no banco de dados se não houver erros
+        const newGenre = await prisma.genre.create({
+            data: { name }
+        });
+
+        res.status(201).send(newGenre);
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao cadastrar um gênero" });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Servidor em execução em http://localhost:${port}`);

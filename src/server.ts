@@ -298,6 +298,37 @@ app.delete("/genres/:id", async (req, res) => {
     }
 });
 
+app.get("/movies/language", async (req, res) => {
+    const { language } = req.query;
+    const languageName = language as string;
+
+    let where = {};
+    if (languageName) {
+        where = {
+            languages: {
+                name: {
+                    equals: languageName,
+                    mode: "insensitive"
+                }
+            }
+        };
+    }
+
+    try {
+        const movies = await prisma.movie.findMany({
+            where,
+            include: {
+                genres: true,
+                languages: true
+            }
+        });
+
+        res.json(movies);
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao buscar os filmes" });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Servidor em execução em http://localhost:${port}`);
 });

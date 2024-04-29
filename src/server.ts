@@ -2,7 +2,6 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
-import { Prisma } from "@prisma/client";
 
 const port = 3000;
 const app = express();
@@ -11,25 +10,38 @@ const prisma = new PrismaClient();
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get("/movies/sort", async (req, res) => {
-    const { sort } = req.query;
-    console.log(sort);
+app.get("/movies/filter", async (req, res) => {
+    const { language, sort } = req.query;
+    const languageName = language as string;
+    const sortName = sort as string;
 
-    let orderBy: Prisma.MovieOrderByWithRelationInput | Prisma.MovieOrderByWithRelationInput[] | undefined;
-
-    if (sort === "title") {
+    let orderBy = {};
+    if (sortName === "title") {
         orderBy = {
             title: "asc",
         };
-    } else if (sort === "release_date") {
+    } else if (sortName === "release_date") {
         orderBy = {
             release_date: "asc",
+        };
+    }
+
+    let where = {};
+    if (languageName) {
+        where = {
+            languages: {
+                name: {
+                    equals: languageName,
+                    mode: "insensitive",
+                },
+            },
         };
     }
 
     try {
         const movies = await prisma.movie.findMany({
             orderBy,
+            where: where,
             include: {
                 genres: true,
                 languages: true,
@@ -298,36 +310,6 @@ app.delete("/genres/:id", async (req, res) => {
     }
 });
 
-app.get("/movies/language", async (req, res) => {
-    const { language } = req.query;
-    const languageName = language as string;
-
-    let where = {};
-    if (languageName) {
-        where = {
-            languages: {
-                name: {
-                    equals: languageName,
-                    mode: "insensitive"
-                }
-            }
-        };
-    }
-
-    try {
-        const movies = await prisma.movie.findMany({
-            where,
-            include: {
-                genres: true,
-                languages: true
-            }
-        });
-
-        res.json(movies);
-    } catch (error) {
-        return res.status(500).send({ message: "Falha ao buscar os filmes" });
-    }
-});
 
 app.listen(port, () => {
     console.log(`Servidor em execução em http://localhost:${port}`);

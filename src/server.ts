@@ -222,6 +222,23 @@ app.post("/genres", async (req, res) => {
     }
 });
 
+app.get("/genres", async (_, res) => {
+    try {
+        // Busca todos os gêneros no banco de dados
+        const genres = await prisma.genre.findMany({
+            orderBy: {
+                name: "asc"
+            }
+        });
+
+        res.json(genres);
+        
+    } catch (error) {
+        return res.status(500).send({ message: "Falha ao buscar os gêneros" });
+    }
+});
+
+
 app.listen(port, () => {
     console.log(`Servidor em execução em http://localhost:${port}`);
 });
